@@ -1,127 +1,273 @@
-# Cloud-Based Student Record Management System - MERN Stack
+# FINAL AWS DEPLOYMENT STEPS — Student Record Management System (MERN Stack)
 
-A simple full-stack student record management system built with the MERN stack (MongoDB, Express.js, React, Node.js) for demonstrating cloud deployment on AWS.
+---
 
-## Project Structure
+# BACKEND SERVER COMMANDS (EC2 Instance 1)
 
-```
-krrish2906-student-management/
-├── frontend/          # React + Vite frontend
-├── backend/           # Node.js + Express.js backend
-└── README.md
-```
+```bash id="g1qk2m"
+# Connect to backend EC2
+chmod 400 blog.pem
+ssh -i blog.pem ubuntu@BACKEND_PUBLIC_IP
 
-## Tech Stack
+# Update Ubuntu
+sudo apt update -y
 
-- **Frontend:** React 18 + Vite
-- **Backend:** Node.js + Express.js
-- **Database:** MongoDB Atlas
-- **API Communication:** Axios
-- **Routing:** React Router DOM
+# Install Git and Curl
+sudo apt install git curl -y
 
-## Features
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install nodejs -y
 
-- Add new student records
-- View all student records in a table
-- View individual student details
-- Update student information
-- Delete student records
-- Department and year-based organization
+# Check installation
+node -v
+npm -v
 
-## Prerequisites
+# Clone GitHub repository
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
 
-- Node.js (v18+)
-- npm
-- MongoDB Atlas account
-- AWS account (for deployment)
+# Open repository
+cd YOUR_REPOSITORY
 
-## Quick Start
-
-### 1. Clone the repository
-
-```bash
-git clone <repo-url>
-cd krrish2906-student-management
-```
-
-### 2. Setup Backend
-
-```bash
+# Open backend folder
 cd backend
+
+# Install backend packages
 npm install
+
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Create backend environment file
+nano .env
 ```
 
-Create a `.env` file in the `backend/` directory:
+---
 
-```
+# Add inside backend `.env`
+
+```env id="a8s4vk"
 PORT=5000
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/studentdb?retryWrites=true&w=majority
+
+MONGODB_URI=mongodb+srv://vkbhamare26_db_user:lEML4pbtAI6KrMfo@cluster0.sspjpor.mongodb.net/?appName=Cluster0
 ```
 
-Start the backend server:
+---
 
-```bash
-npm run dev
+# Save `.env`
+
+```text id="r2k7zq"
+CTRL + O
+ENTER
+CTRL + X
 ```
 
-### 3. Setup Frontend
+---
 
-```bash
+# Continue Backend Setup
+
+```bash id="u9v3jx"
+# Start backend using PM2
+pm2 start src/server.js --name student-backend
+
+# Check backend logs
+pm2 logs
+
+# Show running PM2 processes
+pm2 list
+
+# Save PM2 process list
+pm2 save
+
+# Enable PM2 after reboot
+pm2 startup
+```
+
+Run the generated command from:
+
+```bash id="m6p1hf"
+pm2 startup
+```
+
+Then again:
+
+```bash id="n3x7bt"
+pm2 save
+```
+
+---
+
+# FRONTEND SERVER COMMANDS (EC2 Instance 2)
+
+```bash id="z5w2lm"
+# Connect to frontend EC2
+chmod 400 blog.pem
+ssh -i blog.pem ubuntu@FRONTEND_PUBLIC_IP
+
+# Update Ubuntu
+sudo apt update -y
+
+# Install Git, Curl and Nginx
+sudo apt install git curl nginx -y
+
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install nodejs -y
+
+# Check installation
+node -v
+npm -v
+
+# Clone GitHub repository
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+
+# Open repository
+cd YOUR_REPOSITORY
+
+# Open frontend folder
 cd frontend
+
+# Install frontend packages
 npm install
+
+# Create frontend environment file
+nano .env
 ```
 
-Create a `.env` file in the `frontend/` directory:
+---
 
-```
-VITE_API_URL=http://localhost:5000/api
-```
+# Add inside frontend `.env`
 
-Start the frontend:
-
-```bash
-npm run dev
+```env id="t4n8wp"
+VITE_API_URL=http://BACKEND_PUBLIC_IP:5000/api
 ```
 
-### 4. Open the App
+Example:
 
-Visit `http://localhost:5173` in your browser.
+```env id="k9u3dr"
+VITE_API_URL=http://13.60.25.200:5000/api
+```
 
-## MongoDB Atlas Setup
+---
 
-1. Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
-2. Create a free cluster
-3. Create a database user with read/write access
-4. Whitelist your IP address (or use `0.0.0.0/0` for development)
-5. Get the connection string and add it to `backend/.env`
+# Save `.env`
 
-## AWS Deployment Notes
+```text id="f7q1mc"
+CTRL + O
+ENTER
+CTRL + X
+```
 
-### Frontend (S3 + CloudFront or EC2)
+---
 
-```bash
-cd frontend
+# Continue Frontend Setup
+
+```bash id="y2c6vb"
+# Build frontend for production
 npm run build
+
+# Remove old nginx files
+sudo rm -rf /var/www/html/*
+
+# Copy React build files to nginx folder
+sudo cp -r dist/* /var/www/html/
+
+# Start nginx
+sudo systemctl start nginx
+
+# Enable nginx after reboot
+sudo systemctl enable nginx
+
+# Restart nginx
+sudo systemctl restart nginx
+
+# Check nginx status
+sudo systemctl status nginx
 ```
 
-Upload the `dist/` folder to S3 or serve via EC2.
+---
 
-### Backend (EC2)
+# SECURITY GROUP CONFIGURATION
 
-1. Launch an EC2 instance (Ubuntu)
-2. Install Node.js on the instance
-3. Clone the repo and install dependencies
-4. Set environment variables
-5. Use PM2 to run the server: `pm2 start src/server.js`
+## Use SAME Security Group for Both EC2 Instances
 
-### Environment Variables on AWS
+| Type       | Port | Source   |
+| ---------- | ---- | -------- |
+| SSH        | 22   | My IP    |
+| HTTP       | 80   | Anywhere |
+| Custom TCP | 5000 | Anywhere |
 
-Set the following on your EC2 instance:
+---
 
-- `PORT=5000`
-- `MONGODB_URI=<your-atlas-connection-string>`
-- `VITE_API_URL=http://<ec2-public-ip>:5000/api`
+# FINAL ACCESS
 
-## License
+## Frontend Website
 
-ISC
+```text id="j7v4nb"
+http://FRONTEND_PUBLIC_IP
+```
+
+Example:
+
+```text id="e8m2qt"
+http://16.170.232.103
+```
+
+---
+
+## Backend API
+
+```text id="u1p9dx"
+http://BACKEND_PUBLIC_IP:5000/api
+```
+
+Example:
+
+```text id="s4l8kc"
+http://13.60.25.200:5000/api
+```
+
+---
+
+# IMPORTANT NOTES
+
+## Backend `.env`
+
+Use:
+
+```env id="q6z3wr"
+MONGODB_URI=
+```
+
+because this project uses:
+
+```js id="v8x1mt"
+process.env.MONGODB_URI
+```
+
+---
+
+## Frontend `.env`
+
+Use:
+
+```env id="n5b7qy"
+VITE_API_URL=http://BACKEND_PUBLIC_IP:5000/api
+```
+
+because backend routes use `/api`.
+
+---
+
+# If Frontend Cannot Connect To Backend
+
+Rebuild frontend again:
+
+```bash id="c3r9lu"
+npm run build
+sudo rm -rf /var/www/html/*
+sudo cp -r dist/* /var/www/html/
+sudo systemctl restart nginx
+```
+
+because Vite embeds `.env` values during build time.
