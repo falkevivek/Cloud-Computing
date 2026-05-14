@@ -1,99 +1,281 @@
-# Cloud-Based To-Do List Manager - MERN Stack
+# FINAL AWS DEPLOYMENT STEPS — Cloud-Based To-Do List Manager (MERN Stack)
 
-A simple full-stack To-Do list management application built with the MERN stack (MongoDB, Express.js, React, Node.js) for demonstrating cloud deployment on AWS.
+---
 
-## Project Structure
+# BACKEND SERVER COMMANDS (EC2 Instance 1)
 
-```
-todo-app/
-├── frontend/          # React + Vite frontend
-├── backend/           # Node.js + Express.js backend
-└── README.md
-```
+```bash id="x1z0eg"
+# Connect to backend EC2
+chmod 400 blog.pem
+ssh -i blog.pem ubuntu@BACKEND_PUBLIC_IP
 
-## Tech Stack
+# Update Ubuntu
+sudo apt update -y
 
-- **Frontend:** React 18 + Vite
-- **Backend:** Node.js + Express.js
-- **Database:** MongoDB Atlas
-- **API Communication:** Axios
-- **Routing:** React Router DOM
+# Install Git and Curl
+sudo apt install git curl -y
 
-## Features
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install nodejs -y
 
-- Create, Read, Update, Delete (CRUD) to-do tasks
-- View all tasks on the home dashboard
-- Mark tasks as Pending or Completed
-- Set task priority (Low, Medium, High)
-- Track due dates
+# Check installation
+node -v
+npm -v
 
-## Prerequisites
+# Clone GitHub repository
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
 
-- Node.js (v18+)
-- npm
-- MongoDB Atlas account
-- AWS account (for deployment)
+# Open repository
+cd YOUR_REPOSITORY
 
-## Quick Start
-
-### 1. Setup Backend
-
-```bash
+# Open backend folder
 cd backend
+
+# Install backend packages
 npm install
+
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Create backend environment file
+nano .env
 ```
 
-Create a `.env` file in the `backend/` directory:
+---
 
-```
+# Add inside backend `.env`
+
+```env id="s3a7l0"
 PORT=5000
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/tododb?retryWrites=true&w=majority
+
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster.mongodb.net/tododb?retryWrites=true&w=majority
 ```
 
-Start the backend server:
+Example:
 
-```bash
-npm run dev
+```env id="hpx44z"
+PORT=5000
+
+MONGODB_URI=mongodb+srv://vivek:password123@cluster0.mongodb.net/tododb?retryWrites=true&w=majority
 ```
 
-### 2. Setup Frontend
+---
 
-```bash
+# Save `.env`
+
+```text id="l4v3c8"
+CTRL + O
+ENTER
+CTRL + X
+```
+
+---
+
+# Continue Backend Setup
+
+```bash id="e5t6ql"
+# Start backend using PM2
+pm2 start src/server.js --name todo-backend
+
+# Check backend logs
+pm2 logs
+
+# Show running PM2 processes
+pm2 list
+
+# Save PM2 process list
+pm2 save
+
+# Enable PM2 after reboot
+pm2 startup
+```
+
+Run the generated command from:
+
+```bash id="55q0kq"
+pm2 startup
+```
+
+Then again:
+
+```bash id="97y8d9"
+pm2 save
+```
+
+---
+
+# FRONTEND SERVER COMMANDS (EC2 Instance 2)
+
+```bash id="d9jv6j"
+# Connect to frontend EC2
+chmod 400 blog.pem
+ssh -i blog.pem ubuntu@FRONTEND_PUBLIC_IP
+
+# Update Ubuntu
+sudo apt update -y
+
+# Install Git, Curl and Nginx
+sudo apt install git curl nginx -y
+
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install nodejs -y
+
+# Check installation
+node -v
+npm -v
+
+# Clone GitHub repository
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+
+# Open repository
+cd YOUR_REPOSITORY
+
+# Open frontend folder
 cd frontend
+
+# Install frontend packages
 npm install
+
+# Create frontend environment file
+nano .env
 ```
 
-Create a `.env` file in the `frontend/` directory:
+---
 
-```
-VITE_API_URL=http://localhost:5000/api
-```
+# Add inside frontend `.env`
 
-Start the frontend:
-
-```bash
-npm run dev
+```env id="m7g0mv"
+VITE_API_URL=http://BACKEND_PUBLIC_IP:5000/api
 ```
 
-## AWS Deployment Notes
+Example:
 
-### Frontend (S3 + CloudFront or EC2)
+```env id="kq1l4m"
+VITE_API_URL=http://13.60.25.200:5000/api
+```
 
-```bash
-cd frontend
+---
+
+# Save `.env`
+
+```text id="93b3y7"
+CTRL + O
+ENTER
+CTRL + X
+```
+
+---
+
+# Continue Frontend Setup
+
+```bash id="r3pbxk"
+# Build frontend for production
 npm run build
+
+# Remove old nginx files
+sudo rm -rf /var/www/html/*
+
+# Copy React build files to nginx folder
+sudo cp -r dist/* /var/www/html/
+
+# Start nginx
+sudo systemctl start nginx
+
+# Enable nginx after reboot
+sudo systemctl enable nginx
+
+# Restart nginx
+sudo systemctl restart nginx
+
+# Check nginx status
+sudo systemctl status nginx
 ```
 
-Upload the `dist/` folder to S3 or serve via EC2.
+---
 
-### Backend (EC2)
+# SECURITY GROUP CONFIGURATION
 
-1. Launch an EC2 instance (Ubuntu)
-2. Install Node.js
-3. Clone the repo and install dependencies
-4. Set environment variables
-5. Use PM2 to run the server: `pm2 start src/server.js`
+## Use SAME Security Group for Both EC2 Instances
 
-## License
+| Type       | Port | Source   |
+| ---------- | ---- | -------- |
+| SSH        | 22   | My IP    |
+| HTTP       | 80   | Anywhere |
+| Custom TCP | 5000 | Anywhere |
 
-ISC
+---
+
+# FINAL ACCESS
+
+## Frontend Website
+
+```text id="gv0ts7"
+http://FRONTEND_PUBLIC_IP
+```
+
+Example:
+
+```text id="6c1pj8"
+http://16.170.232.103
+```
+
+---
+
+## Backend API
+
+```text id="lb7ruq"
+http://BACKEND_PUBLIC_IP:5000/api
+```
+
+Example:
+
+```text id="kxjlwm"
+http://13.60.25.200:5000/api
+```
+
+---
+
+# IMPORTANT NOTES
+
+## Backend `.env`
+
+Use:
+
+```env id="5z4wlh"
+MONGODB_URI=
+```
+
+because this project uses:
+
+```js id="4mbry2"
+process.env.MONGODB_URI
+```
+
+---
+
+## Frontend `.env`
+
+Use:
+
+```env id="gbf19g"
+VITE_API_URL=http://BACKEND_PUBLIC_IP:5000/api
+```
+
+because backend routes use `/api`.
+
+---
+
+# If Frontend Cannot Connect To Backend
+
+Rebuild frontend again:
+
+```bash id="wafazg"
+npm run build
+sudo rm -rf /var/www/html/*
+sudo cp -r dist/* /var/www/html/
+sudo systemctl restart nginx
+```
+
+because Vite embeds `.env` values during build time.
