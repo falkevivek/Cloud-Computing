@@ -9,34 +9,7 @@
 chmod 400 blog.pem
 ssh -i blog.pem ubuntu@BACKEND_PUBLIC_IP
 
-# Update Ubuntu
-sudo apt update -y
 
-# Install Git and Curl
-sudo apt install git curl -y
-
-# Install Node.js
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt install nodejs -y
-
-# Check installation
-node -v
-npm -v
-
-# Clone GitHub repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-
-# Open repository
-cd YOUR_REPOSITORY
-
-# Open backend folder
-cd backend
-
-# Install backend packages
-npm install
-
-# Install PM2 globally
-sudo npm install -g pm2
 
 # Create backend environment file
 nano .env
@@ -61,31 +34,6 @@ MONGODB_URI=mongodb+srv://vivek:password123@cluster0.mongodb.net/tododb?retryWri
 ```
 
 ---
-
-# Save `.env`
-
-```text id="l4v3c8"
-CTRL + O
-ENTER
-CTRL + X
-```
-
----
-
-# Continue Backend Setup
-
-```bash id="e5t6ql"
-# Start backend using PM2
-pm2 start src/server.js --name todo-backend
-
-# Check backend logs
-pm2 logs
-
-# Show running PM2 processes
-pm2 list
-
-# Save PM2 process list
-pm2 save
 
 # Enable PM2 after reboot
 pm2 startup
@@ -175,35 +123,6 @@ CTRL + X
 npm run build
 
 # Remove old nginx files
-sudo rm -rf /var/www/html/*
-
-# Copy React build files to nginx folder
-sudo cp -r dist/* /var/www/html/
-
-# Start nginx
-sudo systemctl start nginx
-
-# Enable nginx after reboot
-sudo systemctl enable nginx
-
-# Restart nginx
-sudo systemctl restart nginx
-
-# Check nginx status
-sudo systemctl status nginx
-```
-
----
-
-# SECURITY GROUP CONFIGURATION
-
-## Use SAME Security Group for Both EC2 Instances
-
-| Type       | Port | Source   |
-| ---------- | ---- | -------- |
-| SSH        | 22   | My IP    |
-| HTTP       | 80   | Anywhere |
-| Custom TCP | 5000 | Anywhere |
 
 ---
 
@@ -263,19 +182,5 @@ Use:
 VITE_API_URL=http://BACKEND_PUBLIC_IP:5000/api
 ```
 
-because backend routes use `/api`.
-
----
-
-# If Frontend Cannot Connect To Backend
-
-Rebuild frontend again:
-
-```bash id="wafazg"
-npm run build
-sudo rm -rf /var/www/html/*
-sudo cp -r dist/* /var/www/html/
-sudo systemctl restart nginx
-```
 
 because Vite embeds `.env` values during build time.
