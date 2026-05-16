@@ -1,42 +1,5 @@
 # FINAL AWS DEPLOYMENT STEPS — Blog Application (MERN Stack)
 
----
-
-# BACKEND SERVER COMMANDS (EC2 Instance 1)
-
-```bash id="xgk5tv"
-# Connect to backend EC2
-chmod 400 blog.pem
-ssh -i blog.pem ubuntu@BACKEND_PUBLIC_IP
-
-# Update Ubuntu
-sudo apt update -y
-
-# Install Git and Curl
-sudo apt install git curl -y
-
-# Install Node.js
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt install nodejs -y
-
-# Check installation
-node -v
-npm -v
-
-# Clone GitHub repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-
-# Open repository
-cd YOUR_REPOSITORY
-
-# Open backend folder
-cd backend
-
-# Install backend packages
-npm install
-
-# Install PM2 globally
-sudo npm install -g pm2
 
 # Create backend environment file
 nano .env
@@ -64,71 +27,7 @@ CTRL + X
 
 ---
 
-# Continue Backend Setup
 
-```bash id="n3xz6o"
-# Start backend using PM2
-pm2 start src/server.js --name blog-backend
-
-# Check backend logs
-pm2 logs
-
-# Show running PM2 processes
-pm2 list
-
-# Save PM2 process list
-pm2 save
-
-# Enable PM2 after reboot
-pm2 startup
-```
-
-Run the generated command from:
-
-```bash id="21jzrt"
-pm2 startup
-```
-
-Then again:
-
-```bash id="0f7d7o"
-pm2 save
-```
-
----
-
-# FRONTEND SERVER COMMANDS (EC2 Instance 2)
-
-```bash id="v8jlwm"
-# Connect to frontend EC2
-chmod 400 blog.pem
-ssh -i blog.pem ubuntu@FRONTEND_PUBLIC_IP
-
-# Update Ubuntu
-sudo apt update -y
-
-# Install Git, Curl and Nginx
-sudo apt install git curl nginx -y
-
-# Install Node.js
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt install nodejs -y
-
-# Check installation
-node -v
-npm -v
-
-# Clone GitHub repository
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-
-# Open repository
-cd YOUR_REPOSITORY
-
-# Open frontend folder
-cd frontend
-
-# Install frontend packages
-npm install
 
 # Create frontend environment file
 nano .env
