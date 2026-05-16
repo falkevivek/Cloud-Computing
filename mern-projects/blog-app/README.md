@@ -146,27 +146,3 @@ process.env.MONGODB_URI
 
 ---
 
-## Frontend `.env`
-
-Use:
-
-```env id="jlwm3f"
-VITE_API_URL=http://BACKEND_PUBLIC_IP:5000/api
-```
-
-because backend routes use `/api`.
-
----
-
-# If Frontend Cannot Connect To Backend
-
-Rebuild frontend again:
-
-```bash id="vjlwm0"
-npm run build
-sudo rm -rf /var/www/html/*
-sudo cp -r dist/* /var/www/html/
-sudo systemctl restart nginx
-```
-
-because Vite embeds `.env` values during build time.
